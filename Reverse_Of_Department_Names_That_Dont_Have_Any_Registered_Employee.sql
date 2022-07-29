@@ -20,3 +20,28 @@ FROM
 WHERE  
     (EMP.DEPARTMENT_ID(+))=(DEPT.DEPARTMENT_ID)   
     AND (EMP.EMPLOYEE_ID IS NULL)    
+
+--Without PL/SQL--
+
+WITH DEPTNAMES AS
+(
+
+SELECT   
+    DEPT.DEPARTMENT_NAME DEPTN
+FROM   
+    HR.DEPARTMENTS DEPT,  
+    HR.EMPLOYEES EMP  
+WHERE  
+    (EMP.DEPARTMENT_ID(+))=(DEPT.DEPARTMENT_ID)   
+    AND (EMP.EMPLOYEE_ID IS NULL) 
+
+)
+
+select DEPTN,
+       replace(sys_connect_by_path(substr (DEPTN, level*-1, 1), '/'), '/') Reverse_String
+       
+from  DEPTNAMES
+where  connect_by_isleaf = 1
+connect by prior DEPTN = DEPTN          
+           and prior sys_guid() is not null
+           and level <= length(DEPTN);
